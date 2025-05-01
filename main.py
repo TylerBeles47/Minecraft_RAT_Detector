@@ -13,11 +13,11 @@ app = FastAPI(title="Minecraft Security Detector")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173"],  # Your React frontend
+    allow_origins=["http://127.0.0.1:5173", "https://security-frontend-sand.vercel.app/"],  # Your React frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=["https://security-frontend-sand.vercel.app"],
+    
 )
 
 @app.get("/")
