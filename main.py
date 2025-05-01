@@ -17,6 +17,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_origins=["https://security-frontend-sand.vercel.app"],
 )
 
 @app.get("/")
