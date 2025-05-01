@@ -140,22 +140,23 @@ from fastapi.responses import JSONResponse
 def get_scan_history():
     try:
         if not os.path.exists("jar_features.csv"):
-            return []
+            return JSONResponse(content=[])
 
         df = pd.read_csv("jar_features.csv")
 
         if "filename" not in df.columns:
-            return []
+            return JSONResponse(content=[])
 
         df = df.drop_duplicates(subset="filename", keep="last")
 
-        # Replace inf/-inf and convert NaN to None (JSON-safe)
+        # Replace inf and -inf with NaN, then fill all NaN with 0.0
         df = df.replace([np.inf, -np.inf], np.nan)
-        records = df.where(pd.notnull(df), None).to_dict(orient="records")
+        df = df.fillna(0.0)  # or use .fillna(value=None) if you prefer nulls
 
         print("DEBUG: final scan history preview")
         print(df[["filename", "label"]].tail())
 
+        records = df.to_dict(orient="records")
         return JSONResponse(content=records)
 
     except Exception as e:
