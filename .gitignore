@@ -1,0 +1,23 @@
+# Ignore Python virtual environment
+venv/
+
+# Bytecode cache
+__pycache__/
+*.pyc
+
+# Data and logs
+*.csv
+*.pkl
+*.log
+
+# Environment
+.env
+
+# Node frontend
+node_modules/
+dist/
+build/
+
+# VSCode and macOS junk
+.DS_Store
+.vscode/
