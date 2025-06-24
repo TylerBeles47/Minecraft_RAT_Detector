@@ -1,23 +1,63 @@
-# Ignore Python virtual environment
-venv/
-
-# Bytecode cache
+# Python
 __pycache__/
-*.pyc
-
-# Data and logs
-*.csv
-*.pkl
-*.log
-
-# Environment
-.env
-
-# Node frontend
-node_modules/
-dist/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# VSCode and macOS junk
+# Virtual Environment
+venv/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+secrets.yml
+
+# Dataset and models (sensitive/large files)
+dataset/
+models/
+*.pkl
+*.h5
+*.hdf5
+*.model
+*.weights
+
+# Logs and outputs
+*.log
+logs/
+scan_log.csv
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 .DS_Store
 .vscode/
