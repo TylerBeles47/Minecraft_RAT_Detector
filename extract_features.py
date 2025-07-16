@@ -16,7 +16,8 @@ malicious_patterns = {
 # Legitimate gaming domains and APIs
 legitimate_domains = [
     "hypixel.net", "mojang.com", "minecraft.net", "curseforge.com", 
-    "modrinth.com", "fabricmc.net", "minecraftforge.net", "spongeproject.org"
+    "modrinth.com", "fabricmc.net", "minecraftforge.net", "spongeproject.org",
+    "optifine.net", "optifined.net", "optifinedownloads.com"
 ]
 
 # Common Minecraft mod APIs (legitimate)
@@ -96,9 +97,12 @@ def analyze_network_behavior(content: str) -> dict:
     token_access = 0
     for pattern in malicious_patterns["token_stealing"]:
         if pattern in content_lower:
-            # Only count if near network/file operations
+            # Only count if near network/file operations AND not legitimate auth
             pattern_contexts = re.findall(f'.{{0,50}}{pattern}.{{0,50}}', content_lower)
             for context in pattern_contexts:
+                # Skip if it's legitimate authentication (minecraft, optifine, etc.)
+                if any(legit in context for legit in ['minecraft', 'mojang', 'optifine', 'session']):
+                    continue
                 if any(suspicious in context for suspicious in ['http', 'file', 'send', 'get']):
                     token_access += 1
                     break
@@ -106,6 +110,15 @@ def analyze_network_behavior(content: str) -> dict:
     # Network operation complexity
     http_operations = len(re.findall(r'(post|get|put|delete)\s*\(', content_lower))
     base64_usage = len(re.findall(r'base64', content_lower))
+    
+    # Calculate network to game ratio with better detection
+    minecraft_api_count = sum(1 for api in minecraft_apis if api in content_lower)
+    # Add OptiFine specific patterns
+    optifine_patterns = ['optifine', 'shaders', 'renderfx', 'connecttextures']
+    optifine_count = sum(1 for pattern in optifine_patterns if pattern in content_lower)
+    
+    total_game_apis = minecraft_api_count + optifine_count
+    network_ratio = min(10.0, http_operations / max(1, total_game_apis)) if total_game_apis > 0 else 10.0
     
     return {
         "discord_webhook": 1 if discord_webhook else 0,
@@ -115,18 +128,22 @@ def analyze_network_behavior(content: str) -> dict:
         "token_access_patterns": token_access,
         "http_operations_count": http_operations,
         "base64_usage": base64_usage,
-        "network_to_game_ratio": min(10.0, http_operations / max(1, sum(1 for api in minecraft_apis if api in content_lower)))
+        "network_to_game_ratio": network_ratio
     }
 
 def check_mod_legitimacy(content: str, filename: str) -> dict:
     """Check indicators of legitimate mod vs malicious code"""
     content_lower = content.lower()
     
-    # Check for proper mod metadata
-    has_mod_metadata = any(meta in content_lower for meta in ["mcmod.info", "fabric.mod.json", "mods.toml"])
+    # Check for proper mod metadata (including OptiFine specific indicators)
+    mod_metadata_patterns = ["mcmod.info", "fabric.mod.json", "mods.toml", "optifine", "shaders"]
+    has_mod_metadata = any(meta in content_lower for meta in mod_metadata_patterns)
     
-    # Check for legitimate Minecraft API usage
+    # Check for legitimate Minecraft API usage (including OptiFine patterns)
     minecraft_api_usage = sum(1 for api in minecraft_apis if api in content_lower)
+    # Add OptiFine specific API patterns
+    optifine_api_patterns = ['optifine', 'shaders', 'renderfx', 'connecttextures', 'customcolors']
+    minecraft_api_usage += sum(1 for pattern in optifine_api_patterns if pattern in content_lower)
     
     # Check for obfuscation tools
     obfuscation_tools = sum(1 for tool in malicious_patterns["obfuscation"] if tool in content_lower)
