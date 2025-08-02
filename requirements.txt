@@ -13,3 +13,5 @@ alembic
 python-dotenv
 boto3
 asyncpg
+pytest
+httpx

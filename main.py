@@ -38,9 +38,9 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 # Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    init_db()
+# @app.on_event("startup")
+# async def startup_event():
+#     init_db()
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
