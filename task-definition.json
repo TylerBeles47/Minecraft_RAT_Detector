@@ -13,6 +13,9 @@
       "secrets": [
         {"name": "DATABASE_URL", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:DATABASE_URL::"}
       ],
+      "environment": [
+        {"name": "MODEL_S3_BUCKET", "value": "minecraft-rat-bucket"}
+      ],
       "portMappings": [
         {
           "containerPort": 8000,

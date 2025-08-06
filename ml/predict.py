@@ -1,11 +1,67 @@
 import pandas as pd
 import joblib
 import os
+import boto3
+from botocore.exceptions import ClientError
 
-# Load model, feature names, and scaler
-model, feature_names, scaler = joblib.load("models/strong_detector.pkl")
+# Global variables for lazy loading
+model = None
+feature_names = None
+scaler = None
+
+def load_model():
+    """Lazy load the ML model from local file or S3"""
+    global model, feature_names, scaler
+    if model is None:
+        model_path = "models/strong_detector.pkl"
+        
+        # Try to load from local file first
+        if not os.path.exists(model_path):
+            print("Local model not found, attempting S3 download...")
+            download_model_from_s3(model_path)
+        
+        try:
+            model, feature_names, scaler = joblib.load(model_path)
+            print("✅ ML model loaded successfully")
+        except FileNotFoundError:
+            print("❌ ML model file not found after S3 download attempt")
+            raise
+        except Exception as e:
+            print(f"❌ Failed to load ML model: {e}")
+            raise
+
+def download_model_from_s3(local_path):
+    """Download model from S3 bucket"""
+    try:
+        bucket_name = os.getenv("MODEL_S3_BUCKET")
+        if not bucket_name:
+            print("MODEL_S3_BUCKET environment variable not set")
+            return
+            
+        s3_client = boto3.client('s3')
+        s3_key = "models/strong_detector.pkl"
+        
+        print(f"Downloading model from s3://{bucket_name}/{s3_key}")
+        s3_client.download_file(bucket_name, s3_key, local_path)
+        print("✅ Model downloaded from S3")
+        
+    except ClientError as e:
+        print(f"❌ Failed to download model from S3: {e}")
+    except Exception as e:
+        print(f"❌ Error downloading model: {e}")
 
 def predict_file(jar_features: dict) -> dict:
+    # Load model if not already loaded
+    try:
+        load_model()
+    except FileNotFoundError:
+        # Return safe prediction if model is missing (for health checks)
+        return {
+            "prediction": "safe",
+            "probability_malicious": 0.0,
+            "error": "ML model not available"
+        }
+    
     # Create a DataFrame from the features, ensuring all expected columns are present
     X = pd.DataFrame([jar_features], columns=feature_names)
 

@@ -25,8 +25,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Install AWS CLI for model download
+RUN apt-get update && apt-get install -y awscli && rm -rf /var/lib/apt/lists/*
+
 # Create necessary directories
 RUN mkdir -p models temp_decompiled logs
+
+# Download ML model from S3 at runtime (not build time)
+# Model will be downloaded when container starts using MODEL_S3_BUCKET env var
 
 # Set environment variables
 ENV PYTHONPATH=/app
