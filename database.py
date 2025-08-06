@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import JSONB
 import json
 from dotenv import load_dotenv
+from fastapi import HTTPException
 
 # Load environment variables
 load_dotenv()
@@ -18,10 +19,17 @@ load_dotenv()
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is required")
+    print("WARNING: DATABASE_URL environment variable not set")
+    DATABASE_URL = "sqlite:///./fallback.db"
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+try:
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    print("✅ Database connection initialized")
+except Exception as e:
+    print(f"WARNING: Database connection failed: {e}")
+    engine = None
+    SessionLocal = None
 Base = declarative_base()
 
 class ScanResult(Base):
@@ -56,6 +64,8 @@ class ThreatIntelligence(Base):
 
 def get_db():
     """Dependency to get database session"""
+    if SessionLocal is None:
+        raise HTTPException(status_code=503, detail="Database connection unavailable")
     db = SessionLocal()
     try:
         yield db
@@ -64,10 +74,16 @@ def get_db():
 
 def create_tables():
     """Create all tables"""
+    if engine is None:
+        print("❌ Cannot create tables - no database connection")
+        return
     Base.metadata.create_all(bind=engine)
 
 def init_db():
     """Initialize database with tables"""
+    if engine is None:
+        print("❌ Cannot initialize database - no connection")
+        return
     create_tables()
     print("✅ Database tables created successfully")
 

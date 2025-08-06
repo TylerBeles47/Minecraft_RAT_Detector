@@ -146,7 +146,29 @@ async def upload_file_web(
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "service": "minecraft-rat-detector"}
+    """Health check endpoint that doesn't require database connection"""
+    try:
+        health_status = {
+            "status": "healthy", 
+            "service": "minecraft-rat-detector", 
+            "timestamp": time.time()
+        }
+        
+        # Check database connection (but don't fail if it's down)
+        try:
+            from database import engine
+            if engine is not None:
+                with engine.connect() as conn:
+                    conn.execute("SELECT 1")
+                health_status["database"] = "connected"
+            else:
+                health_status["database"] = "not_configured"
+        except Exception as db_error:
+            health_status["database"] = f"error: {str(db_error)}"
+        
+        return health_status
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}
 
 @app.get("/api")
 def api_root():
