@@ -7,37 +7,6 @@
   "executionRoleArn": "arn:aws:iam::104976232296:role/Minecraft-rat",
   "containerDefinitions": [
     {
-      "name": "postgres",
-      "image": "postgres:15",
-      "essential": true,
-      "secrets": [
-        {"name": "POSTGRES_DB", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:dbname::"},
-        {"name": "POSTGRES_USER", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:username::"},
-        {"name": "POSTGRES_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:password::"}
-      ],
-      "portMappings": [
-        {
-          "containerPort": 5432,
-          "protocol": "tcp"
-        }
-      ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "pg_isready -U ratterUser -d rat_detector"],
-        "interval": 30,
-        "timeout": 5,
-        "retries": 3,
-        "startPeriod": 60
-      },
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/minecraft-rat-detector",
-          "awslogs-region": "us-east-2",
-          "awslogs-stream-prefix": "postgres"
-        }
-      }
-    },
-    {
       "name": "app",
       "image": "104976232296.dkr.ecr.us-east-2.amazonaws.com/minecraft-rat-detector-app:latest",
       "essential": true,
@@ -48,12 +17,6 @@
         {
           "containerPort": 8000,
           "protocol": "tcp"
-        }
-      ],
-      "dependsOn": [
-        {
-          "containerName": "postgres",
-          "condition": "HEALTHY"
         }
       ],
       "logConfiguration": {

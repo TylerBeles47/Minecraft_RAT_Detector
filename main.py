@@ -144,6 +144,10 @@ async def upload_file_web(
             import shutil
             shutil.rmtree(decompiled_output_dir)
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "minecraft-rat-detector"}
+
 @app.get("/api")
 def api_root():
     return {"message": "Welcome to the Minecraft RAT Detector API"}
