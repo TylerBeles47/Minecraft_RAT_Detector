@@ -38,9 +38,14 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 # Initialize database on startup
-# @app.on_event("startup")
-# async def startup_event():
-#     init_db()
+@app.on_event("startup")
+async def startup_event():
+    print("FastAPI application starting up!")
+    print("Available routes:")
+    for route in app.routes:
+        if hasattr(route, 'path'):
+            print(f"  {route.methods} {route.path}")
+    # init_db()  # Uncomment if you want DB init
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -147,6 +152,7 @@ async def upload_file_web(
 @app.get("/health")
 def health_check():
     """Health check endpoint that doesn't require database connection"""
+    print("Health check endpoint called!")
     try:
         health_status = {
             "status": "healthy", 
