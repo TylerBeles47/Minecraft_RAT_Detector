@@ -12,7 +12,7 @@
       "image": "104976232296.dkr.ecr.us-east-2.amazonaws.com/minecraft-rat-detector-app:latest",
       "essential": true,
       "secrets": [
-        {"name": "DATABASE_URL", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:DATABASE_URL::"}
+        {"name": "DATABASE_URL", "valueFrom": "arn:aws:secretsmanager:us-east-2:104976232296:secret:minecraft-rat-detector/database:DATABASE_URL::"}
       ],
       "environment": [
         {"name": "MODEL_S3_BUCKET", "value": "minecraft-rat-bucket"}
