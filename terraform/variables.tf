@@ -43,7 +43,7 @@ variable "ecr_repository_url" {
 variable "database_secret_arn" {
   description = "ARN of the database secret in AWS Secrets Manager"
   type        = string
-  default     = "arn:aws:secretsmanager:us-east-2:104976232296:secret:prod/appbeta/postgresql:DATABASE_URL::"
+  default     = ""
 }
 
 variable "s3_bucket_name" {

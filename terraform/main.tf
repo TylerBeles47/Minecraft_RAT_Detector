@@ -77,7 +77,7 @@ resource "aws_ecs_task_definition" "app" {
       secrets = [
         {
           name      = "DATABASE_URL"
-          valueFrom = var.database_secret_arn
+          valueFrom = "${aws_secretsmanager_secret.database_url.arn}:DATABASE_URL::"
         }
       ]
 
@@ -109,7 +109,13 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = false
   }
 
-  depends_on = [aws_nat_gateway.main]
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app.arn
+    container_name   = "app"
+    container_port   = 8000
+  }
+
+  depends_on = [aws_nat_gateway.main, aws_lb_listener.front_end]
 
   tags = var.tags
 }

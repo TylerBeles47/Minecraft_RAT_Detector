@@ -38,7 +38,8 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = [
-          var.database_secret_arn
+          aws_db_instance.main.master_user_secret[0].secret_arn,
+          aws_secretsmanager_secret.database_url.arn
         ]
       }
     ]

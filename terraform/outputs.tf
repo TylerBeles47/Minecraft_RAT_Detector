@@ -42,3 +42,23 @@ output "nat_gateway_ips" {
   description = "Elastic IPs of the NAT gateways"
   value       = aws_eip.nat[*].public_ip
 }
+
+output "load_balancer_url" {
+  description = "URL of the load balancer"
+  value       = "http://${aws_lb.main.dns_name}"
+}
+
+output "load_balancer_dns_name" {
+  description = "DNS name of the load balancer"
+  value       = aws_lb.main.dns_name
+}
+
+output "database_secret_arn" {
+  description = "ARN of the database master user secret"
+  value       = try(aws_db_instance.main.master_user_secret[0].secret_arn, null)
+}
+
+output "database_endpoint" {
+  description = "RDS database endpoint"
+  value       = try(aws_db_instance.main.endpoint, null)
+}
