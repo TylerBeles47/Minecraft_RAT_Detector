@@ -45,7 +45,7 @@ async def startup_event():
     for route in app.routes:
         if hasattr(route, 'path'):
             print(f"  {route.methods} {route.path}")
-    # init_db()  # Uncomment if you want DB init
+    init_db()  # Initialize database tables
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
